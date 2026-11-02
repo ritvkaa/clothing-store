@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import {
   createAdmin,
   removeAdmin,
@@ -19,6 +20,59 @@ type Admin = {
   lastSeenAt?: string | null;
 };
 
+function PasswordField({
+  label,
+  value,
+  onChange,
+  visible,
+  onToggle,
+  placeholder,
+  autoComplete,
+  required,
+  minLength,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  visible: boolean;
+  onToggle: () => void;
+  placeholder: string;
+  autoComplete: string;
+  required: boolean;
+  minLength?: number;
+}) {
+  return (
+    <label className="block min-w-0">
+      <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+        {label}
+      </span>
+      <div className="relative">
+        <input
+          type={visible ? "text" : "password"}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          aria-label={label}
+          value={value}
+          required={required}
+          minLength={minLength}
+          onChange={(event) => onChange(event.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-11 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={visible ? "Hide password" : "Show password"}
+          aria-pressed={visible}
+          title={visible ? "Hide password" : "Show password"}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
+        >
+          {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      </div>
+    </label>
+  );
+}
+
 export default function AdminsTable({
   admins,
 }: {
@@ -27,6 +81,10 @@ export default function AdminsTable({
   const [search, setSearch] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
+  const editDialogRef = useRef<HTMLDialogElement>(null);
+  const [showEditCurrentPassword, setShowEditCurrentPassword] = useState(false);
+  const [showEditNewPassword, setShowEditNewPassword] = useState(false);
+  const [showEditConfirmPassword, setShowEditConfirmPassword] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
@@ -38,7 +96,9 @@ export default function AdminsTable({
   const [editForm, setEditForm] = useState({
     username: "",
     email: "",
-    password: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
   });
 
   const filteredAdmins = useMemo(() => {
@@ -53,6 +113,21 @@ export default function AdminsTable({
         (admin.phone || "").includes(query),
     );
   }, [admins, search]);
+
+  const passwordChangeStarted = Boolean(
+    editForm.currentPassword || editForm.newPassword || editForm.confirmNewPassword,
+  );
+
+  useEffect(() => {
+    const dialog = editDialogRef.current;
+    if (!dialog) return;
+
+    if (editingAdmin && !dialog.open) {
+      dialog.showModal();
+    } else if (!editingAdmin && dialog.open) {
+      dialog.close();
+    }
+  }, [editingAdmin]);
 
   function isOnline(admin: Admin) {
     if (!admin.lastSeenAt) return false;
@@ -121,10 +196,15 @@ export default function AdminsTable({
 
   function startEditingAdmin(admin: Admin) {
     setEditingAdmin(admin);
+    setShowEditCurrentPassword(false);
+    setShowEditNewPassword(false);
+    setShowEditConfirmPassword(false);
     setEditForm({
       username: admin.username,
       email: admin.email,
-      password: "",
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
     });
     setShowAddForm(false);
   }
@@ -272,73 +352,143 @@ export default function AdminsTable({
       )}
 
       {editingAdmin && (
-        <form
-          onSubmit={handleEditAdmin}
-          className="border-b border-slate-200 bg-slate-50 p-5"
+        <dialog
+          ref={editDialogRef}
+          aria-labelledby="edit-admin-dialog-title"
+          onClose={() => setEditingAdmin(null)}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              editDialogRef.current?.close();
+            }
+          }}
+          className="fixed inset-0 m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50 p-0 shadow-2xl backdrop:bg-slate-950/50"
         >
-          <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900">
-                Edit Administrator
-              </h3>
-              <p className="mt-1 text-xs text-slate-500">
-                Leave the new password blank to keep the current one.
-              </p>
+          <form onSubmit={handleEditAdmin} className="p-5 sm:p-7">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <h3
+                  id="edit-admin-dialog-title"
+                  className="text-lg font-semibold text-slate-900"
+                >
+                  Edit Administrator
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Update account details here. Password changes are optional
+                  and verified below.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => editDialogRef.current?.close()}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-200 hover:text-slate-900"
+              >
+                Cancel
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setEditingAdmin(null)}
-              className="text-sm font-medium text-slate-500 hover:text-slate-900"
-            >
-              Cancel
-            </button>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <input
-              required
-              type="text"
-              maxLength={60}
-              placeholder="Username"
-              value={editForm.username}
-              onChange={(event) =>
-                setEditForm({ ...editForm, username: event.target.value })
-              }
-              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
-            />
-            <input
-              required
-              type="email"
-              placeholder="Email"
-              value={editForm.email}
-              onChange={(event) =>
-                setEditForm({ ...editForm, email: event.target.value })
-              }
-              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
-            />
-            <input
-              type="password"
-              minLength={6}
-              autoComplete="new-password"
-              placeholder="New password (optional)"
-              value={editForm.password}
-              onChange={(event) =>
-                setEditForm({ ...editForm, password: event.target.value })
-              }
-              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
-            />
-          </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Username
+                </span>
+                <input
+                  required
+                  type="text"
+                  maxLength={60}
+                  value={editForm.username}
+                  onChange={(event) =>
+                    setEditForm({ ...editForm, username: event.target.value })
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Email
+                </span>
+                <input
+                  required
+                  type="email"
+                  value={editForm.email}
+                  onChange={(event) =>
+                    setEditForm({ ...editForm, email: event.target.value })
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                />
+              </label>
+            </div>
 
-          <button
-            type="submit"
-            disabled={loadingId === `edit-${editingAdmin._id}`}
-            className="mt-4 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
-          >
-            {loadingId === `edit-${editingAdmin._id}`
-              ? "Saving..."
-              : "Save Administrator"}
-          </button>
-        </form>
+            <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold text-slate-900">
+                  Change password{" "}
+                  <span className="font-normal text-slate-400">(optional)</span>
+                </h4>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Leave these fields blank to keep the current password. To
+                  change it, enter your current password and confirm the new
+                  one.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <PasswordField
+                  label="Your current password"
+                  placeholder="Your current password"
+                  autoComplete="current-password"
+                  value={editForm.currentPassword}
+                  onChange={(currentPassword) =>
+                    setEditForm({ ...editForm, currentPassword })
+                  }
+                  visible={showEditCurrentPassword}
+                  onToggle={() =>
+                    setShowEditCurrentPassword((visible) => !visible)
+                  }
+                  required={passwordChangeStarted}
+                />
+                <PasswordField
+                  label="New password"
+                  placeholder="New password"
+                  autoComplete="new-password"
+                  value={editForm.newPassword}
+                  onChange={(newPassword) =>
+                    setEditForm({ ...editForm, newPassword })
+                  }
+                  visible={showEditNewPassword}
+                  onToggle={() => setShowEditNewPassword((visible) => !visible)}
+                  required={passwordChangeStarted}
+                  minLength={6}
+                />
+                <PasswordField
+                  label="Confirm new password"
+                  placeholder="Confirm new password"
+                  autoComplete="new-password"
+                  value={editForm.confirmNewPassword}
+                  onChange={(confirmNewPassword) =>
+                    setEditForm({ ...editForm, confirmNewPassword })
+                  }
+                  visible={showEditConfirmPassword}
+                  onToggle={() =>
+                    setShowEditConfirmPassword((visible) => !visible)
+                  }
+                  required={passwordChangeStarted}
+                  minLength={6}
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="submit"
+                disabled={loadingId === `edit-${editingAdmin._id}`}
+                className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+              >
+                {loadingId === `edit-${editingAdmin._id}`
+                  ? "Saving..."
+                  : "Save Administrator"}
+              </button>
+            </div>
+          </form>
+        </dialog>
       )}
 
       {/* Table */}

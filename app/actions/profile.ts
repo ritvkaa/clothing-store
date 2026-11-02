@@ -203,7 +203,9 @@ export async function updateAdmin(
   data: {
     username: string;
     email: string;
-    password?: string;
+    currentPassword?: string;
+    newPassword?: string;
+    confirmNewPassword?: string;
   },
 ) {
   const currentAdmin = await getCurrentAdmin();
@@ -219,14 +221,21 @@ export async function updateAdmin(
     !data ||
     typeof data.username !== "string" ||
     typeof data.email !== "string" ||
-    (data.password !== undefined && typeof data.password !== "string")
+    (data.currentPassword !== undefined && typeof data.currentPassword !== "string") ||
+    (data.newPassword !== undefined && typeof data.newPassword !== "string") ||
+    (data.confirmNewPassword !== undefined && typeof data.confirmNewPassword !== "string")
   ) {
     return { success: false, message: "Invalid administrator details." };
   }
 
   const username = data.username.trim();
   const email = data.email.trim().toLowerCase();
-  const password = data.password ?? "";
+  const currentPassword = data.currentPassword ?? "";
+  const newPassword = data.newPassword ?? "";
+  const confirmNewPassword = data.confirmNewPassword ?? "";
+  const changingPassword = Boolean(
+    currentPassword || newPassword || confirmNewPassword,
+  );
 
   if (!username || !email) {
     return { success: false, message: "Username and email are required." };
@@ -234,8 +243,25 @@ export async function updateAdmin(
   if (username.length > 60 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { success: false, message: "Enter a valid username and email address." };
   }
-  if (password && password.length < 6) {
-    return { success: false, message: "Password must contain at least 6 characters." };
+  if (changingPassword) {
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return {
+        success: false,
+        message: "Enter your current password, a new password, and confirm it.",
+      };
+    }
+    if (!(await bcrypt.compare(currentPassword, currentAdmin.password))) {
+      return { success: false, message: "Your current password is incorrect." };
+    }
+    if (newPassword.length < 6) {
+      return {
+        success: false,
+        message: "New password must contain at least 6 characters.",
+      };
+    }
+    if (newPassword !== confirmNewPassword) {
+      return { success: false, message: "New passwords do not match." };
+    }
   }
 
   const targetAdmin = await Admin.findById(adminId);
@@ -263,12 +289,12 @@ export async function updateAdmin(
 
   targetAdmin.username = username;
   targetAdmin.email = email;
-  if (password) {
-    targetAdmin.password = await bcrypt.hash(password, 10);
+  if (changingPassword) {
+    targetAdmin.password = await bcrypt.hash(newPassword, 10);
   }
   await targetAdmin.save();
 
-  if (password) {
+  if (changingPassword) {
     const sessionId = (await cookies()).get("closet_admin_session")?.value;
     const sessionQuery = {
       admin: targetAdmin._id,
@@ -285,10 +311,14 @@ export async function updateAdmin(
   }
 
   revalidatePath("/admin/admins");
+  const editingSelf =
+    targetAdmin._id.toString() === currentAdmin._id.toString();
   return {
     success: true,
-    message: password
-      ? "Admin details and password updated. They must sign in again."
+    message: changingPassword
+      ? editingSelf
+        ? "Admin details and password updated. Other sessions were signed out."
+        : "Admin details and password updated. They must sign in again."
       : "Admin details updated.",
   };
 }
