@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import {
   createAdmin,
   removeAdmin,
+  updateAdmin,
 } from "@/app/actions/profile";
 
 type Admin = {
@@ -25,6 +26,7 @@ export default function AdminsTable({
 }) {
   const [search, setSearch] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
@@ -32,6 +34,11 @@ export default function AdminsTable({
     email: "",
     password: "",
     phone: "",
+  });
+  const [editForm, setEditForm] = useState({
+    username: "",
+    email: "",
+    password: "",
   });
 
   const filteredAdmins = useMemo(() => {
@@ -112,6 +119,36 @@ export default function AdminsTable({
     }
   }
 
+  function startEditingAdmin(admin: Admin) {
+    setEditingAdmin(admin);
+    setEditForm({
+      username: admin.username,
+      email: admin.email,
+      password: "",
+    });
+    setShowAddForm(false);
+  }
+
+  async function handleEditAdmin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingAdmin) return;
+
+    setLoadingId(`edit-${editingAdmin._id}`);
+    try {
+      const result = await updateAdmin(editingAdmin._id, editForm);
+      if (!result.success) {
+        alert(result.message);
+        setLoadingId(null);
+        return;
+      }
+
+      window.location.reload();
+    } catch {
+      alert("Something went wrong while updating the administrator.");
+      setLoadingId(null);
+    }
+  }
+
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
       {/* Toolbar */}
@@ -137,7 +174,10 @@ export default function AdminsTable({
           />
 
           <button
-            onClick={() => setShowAddForm((value) => !value)}
+            onClick={() => {
+              setEditingAdmin(null);
+              setShowAddForm((value) => !value);
+            }}
             className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
             {showAddForm ? "Cancel" : "+ Add Admin"}
@@ -227,6 +267,76 @@ export default function AdminsTable({
             {loadingId === "create"
               ? "Creating..."
               : "Create Administrator"}
+          </button>
+        </form>
+      )}
+
+      {editingAdmin && (
+        <form
+          onSubmit={handleEditAdmin}
+          className="border-b border-slate-200 bg-slate-50 p-5"
+        >
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">
+                Edit Administrator
+              </h3>
+              <p className="mt-1 text-xs text-slate-500">
+                Leave the new password blank to keep the current one.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEditingAdmin(null)}
+              className="text-sm font-medium text-slate-500 hover:text-slate-900"
+            >
+              Cancel
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <input
+              required
+              type="text"
+              maxLength={60}
+              placeholder="Username"
+              value={editForm.username}
+              onChange={(event) =>
+                setEditForm({ ...editForm, username: event.target.value })
+              }
+              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
+            />
+            <input
+              required
+              type="email"
+              placeholder="Email"
+              value={editForm.email}
+              onChange={(event) =>
+                setEditForm({ ...editForm, email: event.target.value })
+              }
+              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
+            />
+            <input
+              type="password"
+              minLength={6}
+              autoComplete="new-password"
+              placeholder="New password (optional)"
+              value={editForm.password}
+              onChange={(event) =>
+                setEditForm({ ...editForm, password: event.target.value })
+              }
+              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loadingId === `edit-${editingAdmin._id}`}
+            className="mt-4 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+          >
+            {loadingId === `edit-${editingAdmin._id}`
+              ? "Saving..."
+              : "Save Administrator"}
           </button>
         </form>
       )}
@@ -325,19 +435,28 @@ export default function AdminsTable({
                     </td>
 
                     <td className="px-6 py-5 text-right">
-                      {online ? (
-                        <span className="text-xs font-medium text-slate-400">
-                          Must be offline
-                        </span>
-                      ) : (
+                      <div className="flex justify-end gap-2">
                         <button
-                          disabled={loading}
-                          onClick={() => handleRemoveAdmin(admin._id)}
-                          className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
+                          disabled={loadingId !== null}
+                          onClick={() => startEditingAdmin(admin)}
+                          className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
                         >
-                          {loading ? "Removing..." : "Remove"}
+                          Edit
                         </button>
-                      )}
+                        {online ? (
+                          <span className="self-center text-xs font-medium text-slate-400">
+                            Must be offline to remove
+                          </span>
+                        ) : (
+                          <button
+                            disabled={loading}
+                            onClick={() => handleRemoveAdmin(admin._id)}
+                            className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
+                          >
+                            {loading ? "Removing..." : "Remove"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

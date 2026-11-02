@@ -3,6 +3,7 @@
 
 import Session from "@/models/Session";
 import bcrypt from "bcryptjs";
+import { revalidatePath } from "next/cache";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import Admin from "@/models/Admin";
@@ -190,6 +191,105 @@ export async function createAdmin(
       username: newAdmin.username,
       email: newAdmin.email,
     },
+  };
+}
+
+/* -------------------------------------------------
+   UPDATE ADMIN — ADMIN ONLY
+------------------------------------------------- */
+
+export async function updateAdmin(
+  adminId: string,
+  data: {
+    username: string;
+    email: string;
+    password?: string;
+  },
+) {
+  const currentAdmin = await getCurrentAdmin();
+  if (!currentAdmin) {
+    return { success: false, message: "Unauthorized." };
+  }
+
+  if (!/^[a-f\d]{24}$/i.test(adminId)) {
+    return { success: false, message: "Admin account not found." };
+  }
+
+  if (
+    !data ||
+    typeof data.username !== "string" ||
+    typeof data.email !== "string" ||
+    (data.password !== undefined && typeof data.password !== "string")
+  ) {
+    return { success: false, message: "Invalid administrator details." };
+  }
+
+  const username = data.username.trim();
+  const email = data.email.trim().toLowerCase();
+  const password = data.password ?? "";
+
+  if (!username || !email) {
+    return { success: false, message: "Username and email are required." };
+  }
+  if (username.length > 60 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { success: false, message: "Enter a valid username and email address." };
+  }
+  if (password && password.length < 6) {
+    return { success: false, message: "Password must contain at least 6 characters." };
+  }
+
+  const targetAdmin = await Admin.findById(adminId);
+  if (!targetAdmin) {
+    return { success: false, message: "Admin account not found." };
+  }
+
+  const [adminConflict, customerConflict] = await Promise.all([
+    Admin.findOne({
+      _id: { $ne: targetAdmin._id },
+      $or: [{ username }, { email }],
+    }),
+    User.findOne({
+      role: { $ne: "admin" },
+      $or: [{ username }, { email }],
+    }),
+  ]);
+
+  if (adminConflict || customerConflict) {
+    return {
+      success: false,
+      message: "That username or email is already used by another account.",
+    };
+  }
+
+  targetAdmin.username = username;
+  targetAdmin.email = email;
+  if (password) {
+    targetAdmin.password = await bcrypt.hash(password, 10);
+  }
+  await targetAdmin.save();
+
+  if (password) {
+    const sessionId = (await cookies()).get("closet_admin_session")?.value;
+    const sessionQuery = {
+      admin: targetAdmin._id,
+      accountType: "admin" as const,
+    };
+    if (
+      targetAdmin._id.toString() === currentAdmin._id.toString() &&
+      sessionId
+    ) {
+      await Session.deleteMany({ ...sessionQuery, sessionId: { $ne: sessionId } });
+    } else {
+      await Session.deleteMany(sessionQuery);
+    }
+  }
+
+  revalidatePath("/admin/admins");
+  return {
+    success: true,
+    message: password
+      ? "Admin details and password updated. They must sign in again."
+      : "Admin details updated.",
   };
 }
 
