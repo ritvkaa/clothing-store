@@ -7,6 +7,7 @@ import { isProductInWishlist } from "@/app/actions/wishlist";
 import { AddToCartButton } from "./_components/AddToCartButton";
 import WishlistButton from "./_components/WishlistButton";
 import StoreName from "@/app/_components/StoreName";
+import StorefrontImage from "@/app/_components/StorefrontImage";
 
 export default async function ProductPage({
   params,
@@ -76,17 +77,11 @@ export default async function ProductPage({
           {/* IMAGES */}
           <div>
             <div className="aspect-[3/4] overflow-hidden bg-neutral-100">
-              {product.images?.[0] ? (
-                <img
-                  src={product.images[0]}
-                  alt={product.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-xs tracking-widest text-neutral-400">
-                  NO IMAGE
-                </div>
-              )}
+              <StorefrontImage
+                src={product.images?.[0]}
+                alt={product.name}
+                className="h-full w-full object-cover"
+              />
             </div>
 
             {product.images?.length > 1 && (

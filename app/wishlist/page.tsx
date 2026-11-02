@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getWishlist } from "@/app/actions/wishlist";
 import WishlistRemoveButton from "./WishlistRemoveButton";
 import StoreName from "@/app/_components/StoreName";
+import StorefrontImage from "@/app/_components/StorefrontImage";
 
 export default async function WishlistPage() {
   const wishlist = await getWishlist();
@@ -70,17 +71,11 @@ export default async function WishlistPage() {
               <article key={product._id}>
                 <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
                   <Link href={`/products/${product._id}`}>
-                    {product.images?.[0] ? (
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="h-full w-full object-cover transition duration-500 hover:scale-[1.02]"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-xs text-neutral-400">
-                        NO IMAGE
-                      </div>
-                    )}
+                    <StorefrontImage
+                      src={product.images?.[0]}
+                      alt={product.name}
+                      className="h-full w-full object-cover transition duration-500 hover:scale-[1.02]"
+                    />
                   </Link>
 
                   <WishlistRemoveButton

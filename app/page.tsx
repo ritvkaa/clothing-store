@@ -3,6 +3,7 @@ import { getCategories } from "@/app/actions/category";
 import { getProducts } from "@/app/actions/product";
 import { getHomepage } from "@/app/actions/homepage";
 import { getStoreSettings } from "@/lib/store-settings";
+import StorefrontImage from "@/app/_components/StorefrontImage";
 
 export default async function Page() {
   const [categories, products, homepage, storeSettings] = await Promise.all([
@@ -61,13 +62,11 @@ export default async function Page() {
 
       {/* HERO */}
       <section className="relative h-[calc(100vh-80px)] min-h-[600px] overflow-hidden bg-neutral-100">
-        {homepage.heroImage && (
-          <img
-            src={homepage.heroImage}
-            alt={`${storeSettings.storeName} collection`}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        )}
+        <img
+          src={homepage.heroImage?.trim() || "/images/storefront-hero.jpg"}
+          alt={`${storeSettings.storeName} collection`}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
 
         <div className="absolute inset-0 bg-black/20" />
 
@@ -104,25 +103,37 @@ export default async function Page() {
         </div>
 
         <div className="grid grid-cols-2 gap-px bg-black/10 md:grid-cols-3 lg:grid-cols-4">
-          {categories.map((category: any) => (
-            <Link
-              key={category._id}
-              href={`/category/${category.key}`}
-              className="group flex min-h-[260px] items-center justify-center bg-neutral-100 px-6 text-center transition-colors hover:bg-black hover:text-white"
-            >
-              <div>
-                <h3 className="text-xl font-light tracking-[0.12em]">
-                  {category.name.toUpperCase()}
-                </h3>
+          {categories.map((category: any) => {
+            const categoryProduct = products.find(
+              (product: any) => product.category?._id === category._id,
+            );
 
-                {category.subcategories?.length > 0 && (
-                  <p className="mt-4 text-xs tracking-wider opacity-60">
-                    {category.subcategories.length} COLLECTIONS
-                  </p>
-                )}
-              </div>
-            </Link>
-          ))}
+            return (
+              <Link
+                key={category._id}
+                href={`/category/${category.key}`}
+                className="group relative flex min-h-[260px] items-center justify-center overflow-hidden px-6 text-center text-white"
+              >
+                <StorefrontImage
+                  src={categoryProduct?.images?.[0]}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/40 transition-colors group-hover:bg-black/55" />
+                <div className="relative z-10">
+                  <h3 className="text-xl font-light tracking-[0.12em]">
+                    {category.name.toUpperCase()}
+                  </h3>
+
+                  {category.subcategories?.length > 0 && (
+                    <p className="mt-4 text-xs tracking-wider opacity-60">
+                      {category.subcategories.length} COLLECTIONS
+                    </p>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -157,17 +168,11 @@ export default async function Page() {
                   className="group"
                 >
                   <div className="aspect-[3/4] overflow-hidden bg-neutral-100">
-                    {product.images?.[0] ? (
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-xs tracking-widest text-neutral-400">
-                        NO IMAGE
-                      </div>
-                    )}
+                    <StorefrontImage
+                      src={product.images?.[0]}
+                      alt={product.name}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
                   </div>
 
                   <div className="mt-4">
@@ -213,17 +218,11 @@ export default async function Page() {
               className="group"
             >
               <div className="aspect-[3/4] overflow-hidden bg-neutral-100">
-                {product.images?.[0] ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-xs tracking-widest text-neutral-400">
-                    NO IMAGE
-                  </div>
-                )}
+                <StorefrontImage
+                  src={product.images?.[0]}
+                  alt={product.name}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
               </div>
 
               <div className="mt-4">

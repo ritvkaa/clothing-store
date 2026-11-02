@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getProducts } from "@/app/actions/product";
 import StoreName from "@/app/_components/StoreName";
+import StorefrontImage from "@/app/_components/StorefrontImage";
 
 export default async function SearchPage() {
   const products = await getProducts();
@@ -74,17 +75,11 @@ export default async function SearchPage() {
               className="group"
             >
               <div className="aspect-[3/4] overflow-hidden bg-neutral-100">
-                {product.images?.[0] ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-xs tracking-widest text-neutral-400">
-                    NO IMAGE
-                  </div>
-                )}
+                <StorefrontImage
+                  src={product.images?.[0]}
+                  alt={product.name}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
               </div>
 
               <div className="mt-4">

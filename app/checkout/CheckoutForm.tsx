@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import StorefrontImage from "@/app/_components/StorefrontImage";
 
 type UserData = {
   name: string;
@@ -507,17 +508,11 @@ export default function CheckoutForm({
                 className="flex gap-4"
               >
                 <div className="h-28 w-20 shrink-0 overflow-hidden bg-neutral-100">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-[10px] tracking-[0.1em] text-neutral-400">
-                      NO IMAGE
-                    </div>
-                  )}
+                  <StorefrontImage
+                    src={item.image}
+                    alt={item.name}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
 
                 <div className="min-w-0 flex-1">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import StorefrontImage from "@/app/_components/StorefrontImage";
 import { useState } from "react";
 import {
   removeFromCart,
@@ -86,17 +87,11 @@ export default function CartItems({
                 href={`/products/${product._id}`}
                 className="h-44 w-32 shrink-0 overflow-hidden bg-neutral-100 sm:h-52 sm:w-40"
               >
-                {product.images?.[0] ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition duration-500 hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-xs tracking-[0.1em] text-neutral-400">
-                    NO IMAGE
-                  </div>
-                )}
+                <StorefrontImage
+                  src={product.images?.[0]}
+                  alt={product.name}
+                  className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                />
               </Link>
 
               {/* DETAILS */}
