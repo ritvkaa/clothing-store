@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:accessories": "node scripts/seed-accessories-category.mjs"
+    "seed:accessories": "node scripts/seed-accessories-category.mjs",
+    "ensure:category-subcategories": "node scripts/ensure-category-subcategories.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
