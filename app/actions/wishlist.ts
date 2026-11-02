@@ -251,7 +251,9 @@ export async function getWishlistedProductIds() {
     .select("products")
     .lean();
 
-  return (wishlist?.products || []).map((productId) => productId.toString());
+  return (wishlist?.products || []).map((productId: mongoose.Types.ObjectId) =>
+    productId.toString(),
+  );
 }
 
 export async function isProductInWishlist(
