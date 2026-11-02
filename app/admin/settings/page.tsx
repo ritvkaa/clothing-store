@@ -10,14 +10,14 @@ export default async function AdminSettingsPage() {
     <div className="space-y-8">
       <header className="border-b border-slate-200 pb-6">
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-          Store settings
+          Store details
         </h1>
         <p className="mt-2 text-sm text-slate-500">
-          Update customer-facing store details, delivery pricing, and your admin account.
+          Manage the details customers see on the storefront.
         </p>
       </header>
 
-      <SettingsForms initialSettings={settings} />
+      <SettingsForms initialStore={settings} />
     </div>
   );
 }
