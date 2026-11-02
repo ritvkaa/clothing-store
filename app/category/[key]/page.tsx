@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { getCategories } from "@/app/actions/category";
 import { getProducts } from "@/app/actions/product";
+import { getWishlistedProductIds } from "@/app/actions/wishlist";
 import StoreName from "@/app/_components/StoreName";
 import StorefrontImage from "@/app/_components/StorefrontImage";
+import ProductWishlistButton from "@/app/_components/ProductWishlistButton";
 
 export default async function CategoryPage({
   params,
@@ -11,10 +13,12 @@ export default async function CategoryPage({
 }) {
   const { key } = await params;
 
-  const [categories, products] = await Promise.all([
+  const [categories, products, wishlistedProductIds] = await Promise.all([
     getCategories(),
     getProducts(),
+    getWishlistedProductIds(),
   ]);
+  const wishlistedProducts = new Set(wishlistedProductIds);
 
   const category = categories.find(
     (item: any) => item.key === key,
@@ -133,8 +137,8 @@ export default async function CategoryPage({
         ) : (
           <div className="grid grid-cols-2 gap-x-5 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
             {categoryProducts.map((product: any) => (
+              <div key={product._id} className="group relative">
               <Link
-                key={product._id}
                 href={`/products/${product._id}`}
                 className="group"
               >
@@ -160,6 +164,12 @@ export default async function CategoryPage({
                   </p>
                 </div>
               </Link>
+              <ProductWishlistButton
+                key={`${product._id}-${wishlistedProducts.has(product._id)}`}
+                productId={product._id}
+                initialWishlisted={wishlistedProducts.has(product._id)}
+              />
+              </div>
             ))}
           </div>
         )}

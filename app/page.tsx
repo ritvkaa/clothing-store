@@ -1,17 +1,21 @@
 import Link from "next/link";
 import { getCategories } from "@/app/actions/category";
 import { getProducts } from "@/app/actions/product";
+import { getWishlistedProductIds } from "@/app/actions/wishlist";
 import { getHomepage } from "@/app/actions/homepage";
 import { getStoreSettings } from "@/lib/store-settings";
+import ProductWishlistButton from "@/app/_components/ProductWishlistButton";
 import StorefrontImage from "@/app/_components/StorefrontImage";
 
 export default async function Page() {
-  const [categories, products, homepage, storeSettings] = await Promise.all([
+  const [categories, products, homepage, storeSettings, wishlistedProductIds] = await Promise.all([
     getCategories(),
     getProducts(),
     getHomepage(),
     getStoreSettings(),
+    getWishlistedProductIds(),
   ]);
+  const wishlistedProducts = new Set(wishlistedProductIds);
 
   const featuredProducts = products
     .filter((product: any) => product.isFeatured)
@@ -162,8 +166,8 @@ export default async function Page() {
 
             <div className="grid grid-cols-2 gap-x-5 gap-y-12 lg:grid-cols-4">
               {featuredProducts.map((product: any) => (
+                <div key={product._id} className="group relative">
                 <Link
-                  key={product._id}
                   href={`/products/${product._id}`}
                   className="group"
                 >
@@ -185,6 +189,12 @@ export default async function Page() {
                     <p className="mt-2 text-sm">₹{product.price}</p>
                   </div>
                 </Link>
+                <ProductWishlistButton
+                  key={`${product._id}-${wishlistedProducts.has(product._id)}`}
+                  productId={product._id}
+                  initialWishlisted={wishlistedProducts.has(product._id)}
+                />
+                </div>
               ))}
             </div>
           </div>
@@ -212,8 +222,8 @@ export default async function Page() {
 
         <div className="grid grid-cols-2 gap-x-5 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
           {newArrivals.map((product: any) => (
+            <div key={product._id} className="group relative">
             <Link
-              key={product._id}
               href={`/products/${product._id}`}
               className="group"
             >
@@ -235,6 +245,12 @@ export default async function Page() {
                 <p className="mt-2 text-sm">₹{product.price}</p>
               </div>
             </Link>
+            <ProductWishlistButton
+              key={`${product._id}-${wishlistedProducts.has(product._id)}`}
+              productId={product._id}
+              initialWishlisted={wishlistedProducts.has(product._id)}
+            />
+            </div>
           ))}
         </div>
       </section>

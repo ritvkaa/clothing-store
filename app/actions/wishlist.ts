@@ -6,11 +6,27 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Wishlist from "@/models/Wishlist";
 import Product from "@/models/Product";
+import Session from "@/models/Session";
+import User from "@/models/User";
 
 async function getUserId() {
   const cookieStore = await cookies();
+  const sessionId = cookieStore.get("closet_customer_session")?.value;
+  if (!sessionId) return null;
 
-  return cookieStore.get("userId")?.value || null;
+  await connectDB();
+  const session = await Session.findOne({
+    sessionId,
+    accountType: "user",
+    expiresAt: { $gt: new Date() },
+  }).select("user");
+
+  if (!session?.user) return null;
+
+  const user = await User.findById(session.user).select("isActive");
+  if (!user?.isActive) return null;
+
+  return user._id.toString();
 }
 
 export async function addToWishlist(productId: string) {
@@ -225,6 +241,17 @@ export async function getWishlist() {
   }
 
   return JSON.parse(JSON.stringify(wishlist));
+}
+
+export async function getWishlistedProductIds() {
+  const userId = await getUserId();
+  if (!userId) return [];
+
+  const wishlist = await Wishlist.findOne({ user: userId })
+    .select("products")
+    .lean();
+
+  return (wishlist?.products || []).map((productId) => productId.toString());
 }
 
 export async function isProductInWishlist(

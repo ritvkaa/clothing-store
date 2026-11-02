@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { getProducts } from "@/app/actions/product";
+import { getWishlistedProductIds } from "@/app/actions/wishlist";
 import StoreName from "@/app/_components/StoreName";
 import StorefrontImage from "@/app/_components/StorefrontImage";
+import ProductWishlistButton from "@/app/_components/ProductWishlistButton";
 
 export default async function SearchPage() {
-  const products = await getProducts();
+  const [products, wishlistedProductIds] = await Promise.all([
+    getProducts(),
+    getWishlistedProductIds(),
+  ]);
+  const wishlistedProducts = new Set(wishlistedProductIds);
 
   return (
     <main className="min-h-screen bg-white text-black">
@@ -69,8 +75,8 @@ export default async function SearchPage() {
       <section className="mx-auto max-w-[1500px] px-6 pb-24 lg:px-10">
         <div className="grid grid-cols-2 gap-x-5 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
           {products.map((product: any) => (
+            <div key={product._id} className="group relative">
             <Link
-              key={product._id}
               href={`/products/${product._id}`}
               className="group"
             >
@@ -96,6 +102,12 @@ export default async function SearchPage() {
                 </p>
               </div>
             </Link>
+            <ProductWishlistButton
+              key={`${product._id}-${wishlistedProducts.has(product._id)}`}
+              productId={product._id}
+              initialWishlisted={wishlistedProducts.has(product._id)}
+            />
+            </div>
           ))}
         </div>
       </section>
