@@ -98,11 +98,11 @@ ADMIN PANEL </p> </div>
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <header className="flex h-24 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-10">
         <div>
-          <h2 className="text-[28px] font-bold leading-tight text-slate-900">
-            Welcome Back <span className="ml-1">👋</span>
+          <h2 className="text-2xl font-light leading-tight tracking-[0.08em] text-black sm:text-3xl">
+            Welcome back, {adminName}
           </h2>
-          <p className="mt-1.5 text-[16px] text-slate-500">
-            Manage your clothing store.
+          <p className="mt-1 text-xs tracking-[0.12em] text-neutral-500">
+            Manage your store and latest activity.
           </p>
         </div>
 
