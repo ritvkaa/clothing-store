@@ -9,9 +9,6 @@ export default async function AdminSettingsPage() {
   return (
     <div className="space-y-8">
       <header className="border-b border-slate-200 pb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-          Admin / Settings
-        </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
           Store settings
         </h1>

@@ -28,10 +28,6 @@ export async function CategoryManagement() {
       {/* HEADER */}
       <div className="flex flex-col justify-between gap-5 border-b border-slate-200 pb-7 lg:flex-row lg:items-end">
         <div>
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">
-            ADMIN / CATEGORIES
-          </p>
-
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
             Category Management
           </h1>

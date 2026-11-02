@@ -64,10 +64,6 @@ export default function CustomersPageClient() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs font-semibold tracking-[0.2em] text-slate-400">
-          ADMIN / CUSTOMERS
-        </p>
-
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
           Customers
         </h1>

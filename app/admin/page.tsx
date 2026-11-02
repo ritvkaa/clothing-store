@@ -5,10 +5,6 @@ export default function AdminPage() {
     <div className="space-y-8">
       {/* HEADER */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-          ADMIN / DASHBOARD
-        </p>
-
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
           Dashboard
         </h1>

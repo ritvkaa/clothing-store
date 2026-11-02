@@ -20,10 +20,6 @@ export default async function ProductsPage() {
       {/* HEADER */}
       <div className="flex items-end justify-between gap-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-            ADMIN / PRODUCTS
-          </p>
-
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
             Products
           </h1>

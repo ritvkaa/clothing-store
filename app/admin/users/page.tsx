@@ -20,10 +20,6 @@ export default async function UsersPage() {
       {/* HEADER */}
       <div className="flex flex-col justify-between gap-5 border-b border-slate-200 pb-7 lg:flex-row lg:items-end">
         <div>
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">
-            ADMIN / USERS
-          </p>
-
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
             User Management
           </h1>

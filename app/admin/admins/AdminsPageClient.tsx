@@ -69,10 +69,6 @@ export default function AdminsPageClient() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <p className="text-xs font-semibold tracking-[0.2em] text-slate-400">
-          ADMIN / ADMINS
-        </p>
-
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
           Administrators
         </h1>

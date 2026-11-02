@@ -32,10 +32,6 @@ export default async function OrdersPage() {
     <div className="space-y-8">
       {/* HEADER */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-          ADMIN
-        </p>
-
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
           Orders
         </h1>
