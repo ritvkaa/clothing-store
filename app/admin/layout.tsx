@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { hasAdminAccess } from "@/lib/admin-auth";
+import { getCurrentAdmin } from "@/lib/admin-auth";
 import AdminLayoutClient from "./AdminLayoutClient";
 
 export default async function AdminLayout({
@@ -7,9 +7,14 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  if (!(await hasAdminAccess())) {
+  const admin = await getCurrentAdmin();
+  if (!admin) {
     redirect("/");
   }
 
-  return <AdminLayoutClient>{children}</AdminLayoutClient>;
+  return (
+    <AdminLayoutClient adminName={admin.username} adminEmail={admin.email}>
+      {children}
+    </AdminLayoutClient>
+  );
 }

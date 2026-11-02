@@ -5,6 +5,7 @@ import { House, ArrowLeft, Package } from "lucide-react";
 import { getUser } from "@/app/actions/profile";
 import { getUserOrderById } from "@/app/actions/order";
 import ReturnRequestButton from "../../admin/orders/[id]/ReturnRequestButton";
+import StoreName from "@/app/_components/StoreName";
 
 const trackingSteps = [
   {
@@ -104,7 +105,7 @@ export default async function OrderDetailsPage({
       <header className="border-b border-black/10">
         <div className="mx-auto flex h-20 max-w-[1500px] items-center justify-between px-6 lg:px-10">
           <Link href="/" className="text-2xl font-bold tracking-[0.18em]">
-            CLOSET
+            <StoreName />
           </Link>
 
           <div className="flex items-center gap-6 text-xs tracking-[0.15em]">

@@ -6,6 +6,7 @@ import { isProductInWishlist } from "@/app/actions/wishlist";
 
 import { AddToCartButton } from "./_components/AddToCartButton";
 import WishlistButton from "./_components/WishlistButton";
+import StoreName from "@/app/_components/StoreName";
 
 export default async function ProductPage({
   params,
@@ -32,7 +33,7 @@ export default async function ProductPage({
             href="/"
             className="text-2xl font-bold tracking-[0.18em]"
           >
-            CLOSET
+            <StoreName />
           </Link>
 
           <div className="flex items-center gap-6 text-xs tracking-[0.15em]">

@@ -1,3 +1,5 @@
+import StoreName from "@/app/_components/StoreName";
+
 export default function AdminPage() {
   return (
     <div className="space-y-8">
@@ -12,7 +14,7 @@ export default function AdminPage() {
         </h1>
 
         <p className="mt-1.5 text-sm text-slate-500">
-          Overview of your CLOSET store.
+          Overview of your <StoreName /> store.
         </p>
       </div>
 

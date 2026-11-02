@@ -18,8 +18,12 @@ import { logoutAction } from "@/app/actions/logout";
 
 export default function AdminLayout({
 children,
+adminName,
+adminEmail,
 }: {
 children: React.ReactNode;
+adminName: string;
+adminEmail: string;
 }) {
 const router = useRouter();
 const [loggingOut, setLoggingOut] = useState(false);
@@ -120,13 +124,13 @@ ADMIN PANEL </p> </div>
 
           <div className="group flex items-center gap-3 rounded-xl px-2 py-1.5">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-[16px] font-bold text-white ring-4 ring-slate-100">
-              A
+                {adminName.charAt(0).toUpperCase() || "A"}
             </div>
             <div className="hidden text-left xl:block">
               <p className="text-[14px] font-semibold text-slate-800">
-                Administrator
+                {adminName}
               </p>
-              <p className="text-xs text-slate-400">Store Manager</p>
+              <p className="text-xs text-slate-400">{adminEmail}</p>
             </div>
           </div>
         </div>

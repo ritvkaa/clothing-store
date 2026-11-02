@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { getCheckoutData } from "@/app/actions/checkout";
 import CheckoutForm from "@/app/checkout/CheckoutForm";
+import StoreName from "@/app/_components/StoreName";
 
 export default async function CheckoutPage() {
   const data = await getCheckoutData();
@@ -25,7 +26,7 @@ export default async function CheckoutPage() {
               href="/"
               className="text-2xl font-bold tracking-[0.18em]"
             >
-              CLOSET
+              <StoreName />
             </Link>
           </div>
         </header>
@@ -58,7 +59,7 @@ export default async function CheckoutPage() {
             href="/"
             className="text-2xl font-bold tracking-[0.18em]"
           >
-            CLOSET
+            {data.storeName}
           </Link>
 
           <div className="flex items-center gap-6 text-xs tracking-[0.15em]">
@@ -125,6 +126,7 @@ export default async function CheckoutPage() {
             user={data.user}
             items={data.items}
             summary={data.summary}
+            storeName={data.storeName}
           />
         </div>
       </section>

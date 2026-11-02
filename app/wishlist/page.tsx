@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getWishlist } from "@/app/actions/wishlist";
 import WishlistRemoveButton from "./WishlistRemoveButton";
+import StoreName from "@/app/_components/StoreName";
 
 export default async function WishlistPage() {
   const wishlist = await getWishlist();
@@ -19,7 +20,7 @@ export default async function WishlistPage() {
             href="/"
             className="text-2xl font-bold tracking-[0.18em]"
           >
-            CLOSET
+            <StoreName />
           </Link>
 
           <div className="flex items-center gap-6 text-xs tracking-[0.15em]">

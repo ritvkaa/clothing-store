@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCategories } from "@/app/actions/category";
 import { getProducts } from "@/app/actions/product";
+import StoreName from "@/app/_components/StoreName";
 
 export default async function CategoryPage({
   params,
@@ -52,7 +53,7 @@ export default async function CategoryPage({
             href="/"
             className="text-2xl font-bold tracking-[0.18em]"
           >
-            CLOSET
+            <StoreName />
           </Link>
 
           <div className="flex items-center gap-6 text-xs tracking-[0.15em]">
@@ -90,7 +91,7 @@ export default async function CategoryPage({
       {/* CATEGORY HEADER */}
       <section className="mx-auto max-w-[1500px] px-6 pb-12 pt-16 lg:px-10">
         <p className="text-xs tracking-[0.3em] text-neutral-500">
-          CLOSET COLLECTION
+          <StoreName /> COLLECTION
         </p>
 
         <h1 className="mt-3 text-4xl font-light tracking-wide">
@@ -173,7 +174,7 @@ export default async function CategoryPage({
       <footer className="border-t border-black/10 px-6 py-8 lg:px-10">
         <div className="mx-auto flex max-w-[1500px] justify-between text-xs tracking-wider text-neutral-500">
           <Link href="/">
-            CLOSET
+            <StoreName />
           </Link>
 
           <Link href="/products">

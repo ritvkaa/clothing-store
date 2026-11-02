@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getProducts } from "@/app/actions/product";
+import StoreName from "@/app/_components/StoreName";
 
 export default async function SearchPage() {
   const products = await getProducts();
@@ -13,7 +14,7 @@ export default async function SearchPage() {
             href="/"
             className="text-2xl font-bold tracking-[0.18em]"
           >
-            CLOSET
+            <StoreName />
           </Link>
 
           <div className="flex items-center gap-6 text-xs tracking-[0.15em]">
@@ -35,7 +36,7 @@ export default async function SearchPage() {
       {/* SEARCH */}
       <section className="mx-auto max-w-[900px] px-6 py-20">
         <p className="text-xs tracking-[0.3em] text-neutral-500">
-          CLOSET
+          <StoreName />
         </p>
 
         <h1 className="mt-3 text-4xl font-light tracking-wide">

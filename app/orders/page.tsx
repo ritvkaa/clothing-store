@@ -4,6 +4,7 @@ import { ArrowRight, Package } from "lucide-react";
 
 import { getUser } from "@/app/actions/profile";
 import { getUserOrders } from "@/app/actions/order";
+import StoreName from "@/app/_components/StoreName";
 
 function formatStatus(status: string) {
   return status.replaceAll("_", " ");
@@ -35,7 +36,7 @@ export default async function OrdersPage() {
             href="/"
             className="text-2xl font-bold tracking-[0.18em]"
           >
-            CLOSET
+            <StoreName />
           </Link>
 
           <div className="flex items-center gap-6 text-xs tracking-[0.15em]">

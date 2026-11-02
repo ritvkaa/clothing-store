@@ -36,6 +36,7 @@ type Summary = {
   subtotal: number;
   deliveryCharge: number;
   totalAmount: number;
+  freeShippingThreshold: number;
 };
 
 declare global {
@@ -48,10 +49,12 @@ export default function CheckoutForm({
   user,
   items,
   summary,
+  storeName,
 }: {
   user: UserData;
   items: Item[];
   summary: Summary;
+  storeName: string;
 }) {
   const [form, setForm] = useState<UserData>(user);
 
@@ -171,9 +174,9 @@ export default function CheckoutForm({
 
         currency: result.currency,
 
-        name: "CLOSET",
+        name: storeName,
 
-        description: "CLOSET Order",
+        description: `${storeName} Order`,
 
         order_id: result.razorpayOrderId,
 
@@ -580,7 +583,7 @@ export default function CheckoutForm({
 
             {summary.deliveryCharge > 0 && (
               <p className="border-t border-black/10 pt-4 text-xs leading-5 text-neutral-500">
-                Free delivery on orders above ₹2,000.
+                Free delivery on orders above ₹{summary.freeShippingThreshold.toLocaleString("en-IN")}.
               </p>
             )}
 

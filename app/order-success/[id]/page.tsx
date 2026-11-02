@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getUserOrderById } from "@/app/actions/order";
+import StoreName from "@/app/_components/StoreName";
 
 export default async function OrderSuccessPage({
   params,
@@ -25,7 +26,7 @@ export default async function OrderSuccessPage({
     <main className="flex min-h-screen items-center justify-center bg-white px-6 text-black">
       <section className="w-full max-w-xl text-center">
         <p className="text-xs tracking-[0.25em] text-neutral-500">
-          CLOSET
+          <StoreName />
         </p>
 
         <h1 className="mt-6 text-4xl font-light tracking-wide">

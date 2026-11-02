@@ -5,6 +5,7 @@ import { ArrowRight, ShoppingBag } from "lucide-react";
 import { getCart } from "@/app/actions/cart";
 import { getUser } from "@/app/actions/profile";
 import CartItems from "./CartItems";
+import { getStoreSettings } from "@/lib/store-settings";
 
 export default async function CartPage() {
   const user = await getUser();
@@ -13,7 +14,7 @@ export default async function CartPage() {
     redirect("/login?redirect=/cart");
   }
 
-  const cart = await getCart();
+  const [cart, storeSettings] = await Promise.all([getCart(), getStoreSettings()]);
   const items = cart?.items || [];
 
   const subtotal = items.reduce(
@@ -22,7 +23,10 @@ export default async function CartPage() {
     0,
   );
 
-  const delivery = subtotal >= 2000 || subtotal === 0 ? 0 : 99;
+  const delivery =
+    subtotal >= storeSettings.freeShippingThreshold || subtotal === 0
+      ? 0
+      : storeSettings.deliveryFee;
 
   const total = subtotal + delivery;
 
@@ -35,7 +39,7 @@ export default async function CartPage() {
             href="/"
             className="text-2xl font-bold tracking-[0.18em]"
           >
-            CLOSET
+            {storeSettings.storeName}
           </Link>
 
           <div className="flex items-center gap-6 text-xs tracking-[0.15em]">
@@ -147,7 +151,7 @@ export default async function CartPage() {
 
                   {delivery > 0 && (
                     <p className="border-t border-black/10 pt-4 text-xs leading-5 text-gray-500">
-                      Free delivery on orders above ₹2,000.
+                      Free delivery on orders above ₹{storeSettings.freeShippingThreshold.toLocaleString("en-IN")}.
                     </p>
                   )}
 

@@ -2,12 +2,14 @@ import Link from "next/link";
 import { getCategories } from "@/app/actions/category";
 import { getProducts } from "@/app/actions/product";
 import { getHomepage } from "@/app/actions/homepage";
+import { getStoreSettings } from "@/lib/store-settings";
 
 export default async function Page() {
-  const [categories, products, homepage] = await Promise.all([
+  const [categories, products, homepage, storeSettings] = await Promise.all([
     getCategories(),
     getProducts(),
     getHomepage(),
+    getStoreSettings(),
   ]);
 
   const featuredProducts = products
@@ -22,7 +24,7 @@ export default async function Page() {
       <header className="sticky top-0 z-50 border-b border-black/10 bg-white">
         <div className="mx-auto flex h-20 max-w-[1500px] items-center justify-between px-6 lg:px-10">
           <Link href="/" className="text-2xl font-bold tracking-[0.18em]">
-            CLOSET
+            {storeSettings.storeName}
           </Link>
 
           <nav className="hidden items-center gap-8 text-[13px] font-medium tracking-[0.08em] md:flex">
@@ -62,7 +64,7 @@ export default async function Page() {
         {homepage.heroImage && (
           <img
             src={homepage.heroImage}
-            alt="CLOSET collection"
+            alt={`${storeSettings.storeName} collection`}
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
@@ -71,7 +73,7 @@ export default async function Page() {
 
         <div className="relative z-10 flex h-full items-end justify-center pb-20 text-center text-white">
           <div>
-            <p className="mb-4 text-xs tracking-[0.35em]">CLOSET</p>
+            <p className="mb-4 text-xs tracking-[0.35em]">{storeSettings.storeName}</p>
 
             <h1 className="text-5xl font-light tracking-[0.08em] sm:text-7xl lg:text-8xl">
               {homepage.heroTitle}
@@ -272,11 +274,23 @@ export default async function Page() {
       <footer className="bg-black px-6 py-16 text-white lg:px-10">
         <div className="mx-auto flex max-w-[1500px] flex-col justify-between gap-10 md:flex-row">
           <div>
-            <h2 className="text-2xl font-bold tracking-[0.18em]">CLOSET</h2>
+            <h2 className="text-2xl font-bold tracking-[0.18em]">{storeSettings.storeName}</h2>
 
             <p className="mt-4 max-w-sm text-sm leading-6 text-white/50">
-              Discover clothing and styles designed for your everyday look.
+              {storeSettings.description}
             </p>
+
+            {(storeSettings.supportEmail || storeSettings.supportPhone || storeSettings.address) && (
+              <div className="mt-5 space-y-2 text-sm text-white/60">
+                {storeSettings.supportEmail && (
+                  <p><a href={`mailto:${storeSettings.supportEmail}`} className="hover:text-white">{storeSettings.supportEmail}</a></p>
+                )}
+                {storeSettings.supportPhone && (
+                  <p><a href={`tel:${storeSettings.supportPhone}`} className="hover:text-white">{storeSettings.supportPhone}</a></p>
+                )}
+                {storeSettings.address && <p className="max-w-sm">{storeSettings.address}</p>}
+              </div>
+            )}
           </div>
 
           <div className="flex gap-12 text-xs tracking-[0.12em]">
@@ -296,7 +310,7 @@ export default async function Page() {
         </div>
 
         <div className="mx-auto mt-16 max-w-[1500px] border-t border-white/10 pt-6 text-xs text-white/30">
-          © {new Date().getFullYear()} CLOSET. All rights reserved.
+          © {new Date().getFullYear()} {storeSettings.storeName}. All rights reserved.
         </div>
       </footer>
     </main>

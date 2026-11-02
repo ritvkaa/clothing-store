@@ -27,7 +27,7 @@ export function Profile({ user }: ProfileProps) {
         {/* PROFILE HEADER */}
         <h2>My Account</h2>
 
-        <p className="subtitle">Manage your CLOSET account and orders.</p>
+        <p className="subtitle">Manage your account and orders.</p>
 
         {/* USER INFORMATION */}
         <div className="profile-info">

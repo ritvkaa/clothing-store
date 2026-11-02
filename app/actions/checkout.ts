@@ -11,6 +11,7 @@ import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import Cart from "@/models/Cart";
 import Product from "@/models/Product";
+import { getStoreSettings } from "@/lib/store-settings";
 
 async function getUserId() {
   const cookieStore = await cookies();
@@ -96,7 +97,9 @@ export async function getCheckoutData() {
     });
   }
 
-  const deliveryCharge = subtotal >= 2000 ? 0 : 99;
+  const storeSettings = await getStoreSettings();
+  const deliveryCharge =
+    subtotal >= storeSettings.freeShippingThreshold ? 0 : storeSettings.deliveryFee;
   const totalAmount = subtotal + deliveryCharge;
 
   return {
@@ -118,7 +121,9 @@ export async function getCheckoutData() {
       subtotal,
       deliveryCharge,
       totalAmount,
+      freeShippingThreshold: storeSettings.freeShippingThreshold,
     },
+    storeName: storeSettings.storeName,
   };
 }
 
@@ -198,7 +203,9 @@ export async function createRazorpayOrder(data: {
     subtotal += product.price * item.quantity;
   }
 
-  const deliveryCharge = subtotal >= 2000 ? 0 : 99;
+  const storeSettings = await getStoreSettings();
+  const deliveryCharge =
+    subtotal >= storeSettings.freeShippingThreshold ? 0 : storeSettings.deliveryFee;
   const totalAmount = subtotal + deliveryCharge;
 
   /*
@@ -456,7 +463,9 @@ export async function placeCodOrder(data: {
     });
   }
 
-  const deliveryCharge = subtotal >= 2000 ? 0 : 99;
+  const storeSettings = await getStoreSettings();
+  const deliveryCharge =
+    subtotal >= storeSettings.freeShippingThreshold ? 0 : storeSettings.deliveryFee;
   const totalAmount = subtotal + deliveryCharge;
 
   // Create the order
