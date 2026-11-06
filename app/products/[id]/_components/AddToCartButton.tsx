@@ -23,28 +23,38 @@ export function AddToCartButton({
   const [size, setSize] = useState(product.sizes?.[0] || "");
   const [color, setColor] = useState(product.colors?.[0] || "");
   const [message, setMessage] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
   const handleAddToCart = async () => {
     setMessage("");
+    setIsAdding(true);
 
-    const result = await addToCart({
-      productId: product._id,
-      quantity: 1,
-      size,
-      color,
-    });
+    try {
+      const item = {
+        productId: product._id,
+        quantity: 1,
+        size,
+        color,
+      };
+      const result = await addToCart(item);
 
-    if (result.requiresLogin) {
-      router.push("/login");
-      return;
+      if (result.requiresLogin) {
+        sessionStorage.setItem("closet-pending-cart-item", JSON.stringify(item));
+        router.push("/login?redirect=%2Fcart");
+        return;
+      }
+
+      if (!result.success) {
+        setMessage(result.message);
+        return;
+      }
+
+      router.push("/cart");
+    } catch {
+      setMessage("Unable to add this product. Please try again.");
+    } finally {
+      setIsAdding(false);
     }
-
-    if (!result.success) {
-      setMessage(result.message);
-      return;
-    }
-
-    router.push("/cart");
   };
 
   if (product.stock <= 0) {
@@ -116,9 +126,10 @@ export function AddToCartButton({
 
       <button
         onClick={handleAddToCart}
-        className="w-full bg-black py-4 text-xs tracking-[0.2em] text-white transition hover:bg-neutral-800"
+        disabled={isAdding}
+        className="w-full bg-black py-4 text-xs tracking-[0.2em] text-white transition hover:bg-neutral-800 disabled:cursor-wait disabled:opacity-60"
       >
-        ADD TO CART
+        {isAdding ? "ADDING..." : "ADD TO CART"}
       </button>
     </div>
   );

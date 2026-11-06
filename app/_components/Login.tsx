@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { House } from "lucide-react";
 import { loginAction } from "@/app/actions/login";
+import { addToCart } from "@/app/actions/cart";
 
 export function Login({
   accountType = "user",
@@ -41,7 +42,38 @@ export function Login({
 
       setSuccess(result.message);
 
-      window.location.assign(isAdminLogin ? "/admin" : "/");
+      if (isAdminLogin) {
+        window.location.assign("/admin");
+        return;
+      }
+
+      const requestedPath = new URLSearchParams(window.location.search).get("redirect");
+      const returnPath = requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
+        ? requestedPath
+        : "/";
+      const pendingItem = sessionStorage.getItem("closet-pending-cart-item");
+
+      if (pendingItem) {
+        try {
+          const item = JSON.parse(pendingItem);
+          const cartResult = await addToCart(item);
+
+          if (!cartResult.success) {
+            sessionStorage.removeItem("closet-pending-cart-item");
+            setError(`Signed in, but ${cartResult.message.toLowerCase()}.`);
+            return;
+          }
+
+          sessionStorage.removeItem("closet-pending-cart-item");
+          window.location.assign("/cart");
+          return;
+        } catch {
+          setError("Signed in, but we couldn’t add the product. Please try again.");
+          return;
+        }
+      }
+
+      window.location.assign(returnPath);
     } catch (err) {
       console.error("[LOGIN CLIENT] Login failed:", err);
       setError("Unable to log in. Check the server terminal for details.");

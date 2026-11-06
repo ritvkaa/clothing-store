@@ -1,11 +1,11 @@
 "use server";
 
-import { cookies } from "next/headers";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 
 import { connectDB } from "@/lib/mongodb";
 import Order from "@/models/Order";
+import { getCustomerUserId } from "@/lib/customer-auth";
 
 export async function requestReturn(
   orderId: string,
@@ -13,8 +13,7 @@ export async function requestReturn(
   quantity: number,
   reason: string,
 ) {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get("userId")?.value;
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {

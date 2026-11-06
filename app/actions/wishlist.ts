@@ -1,36 +1,14 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Wishlist from "@/models/Wishlist";
 import Product from "@/models/Product";
-import Session from "@/models/Session";
-import User from "@/models/User";
-
-async function getUserId() {
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get("closet_customer_session")?.value;
-  if (!sessionId) return null;
-
-  await connectDB();
-  const session = await Session.findOne({
-    sessionId,
-    accountType: "user",
-    expiresAt: { $gt: new Date() },
-  }).select("user");
-
-  if (!session?.user) return null;
-
-  const user = await User.findById(session.user).select("isActive");
-  if (!user?.isActive) return null;
-
-  return user._id.toString();
-}
+import { getCustomerUserId } from "@/lib/customer-auth";
 
 export async function addToWishlist(productId: string) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
@@ -96,7 +74,7 @@ export async function addToWishlist(productId: string) {
 }
 
 export async function removeFromWishlist(productId: string) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
@@ -137,7 +115,7 @@ export async function removeFromWishlist(productId: string) {
 }
 
 export async function toggleWishlist(productId: string) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
@@ -220,7 +198,7 @@ export async function toggleWishlist(productId: string) {
 }
 
 export async function getWishlist() {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return null;
@@ -244,7 +222,7 @@ export async function getWishlist() {
 }
 
 export async function getWishlistedProductIds() {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
   if (!userId) return [];
 
   const wishlist = await Wishlist.findOne({ user: userId })
@@ -259,7 +237,7 @@ export async function getWishlistedProductIds() {
 export async function isProductInWishlist(
   productId: string,
 ) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return false;

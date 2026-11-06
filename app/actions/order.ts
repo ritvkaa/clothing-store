@@ -1,6 +1,5 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 import mongoose from "mongoose";
@@ -9,6 +8,7 @@ import Razorpay from "razorpay";
 import { connectDB } from "@/lib/mongodb";
 import Order from "@/models/Order";
 import { getCurrentAdmin } from "@/lib/admin-auth";
+import { getCustomerUserId } from "@/lib/customer-auth";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || "",
@@ -325,9 +325,7 @@ export async function cancelOrder(orderId: string, reason: string = "") {
 ========================= */
 
 export async function getUserOrderById(orderId: string) {
-  const cookieStore = await cookies();
-
-  const userId = cookieStore.get("userId")?.value;
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return null;
@@ -359,9 +357,7 @@ export async function getUserOrderById(orderId: string) {
 ========================= */
 
 export async function getUserOrders() {
-  const cookieStore = await cookies();
-
-  const userId = cookieStore.get("userId")?.value;
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return [];

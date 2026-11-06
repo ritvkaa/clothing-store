@@ -1,6 +1,5 @@
 "use server";
 
-import { cookies } from "next/headers";
 import mongoose from "mongoose";
 import Order from "@/models/Order";
 
@@ -12,14 +11,10 @@ import User from "@/models/User";
 import Cart from "@/models/Cart";
 import Product from "@/models/Product";
 import { getStoreSettings } from "@/lib/store-settings";
-
-async function getUserId() {
-  const cookieStore = await cookies();
-  return cookieStore.get("userId")?.value || null;
-}
+import { getCustomerUserId } from "@/lib/customer-auth";
 
 export async function getCheckoutData() {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
@@ -136,7 +131,7 @@ export async function createRazorpayOrder(data: {
   state: string;
   pincode: string;
 }) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
@@ -288,7 +283,7 @@ export async function verifyRazorpayPayment(data: {
   razorpayPaymentId: string;
   razorpaySignature: string;
 }) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
@@ -381,7 +376,7 @@ export async function placeCodOrder(data: {
   state: string;
   pincode: string;
 }) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {

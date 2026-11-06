@@ -1,31 +1,9 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { connectDB } from "@/lib/mongodb";
 import Cart from "@/models/Cart";
 import Product from "@/models/Product";
-import Session from "@/models/Session";
-import User from "@/models/User";
-
-async function getUserId() {
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get("closet_customer_session")?.value;
-  if (!sessionId) return null;
-
-  await connectDB();
-  const session = await Session.findOne({
-    sessionId,
-    accountType: "user",
-    expiresAt: { $gt: new Date() },
-  }).select("user");
-
-  if (!session?.user) return null;
-
-  const user = await User.findById(session.user).select("isActive");
-  if (!user?.isActive) return null;
-
-  return user._id.toString();
-}
+import { getCustomerUserId } from "@/lib/customer-auth";
 
 export async function addToCart(data: {
   productId: string;
@@ -33,7 +11,7 @@ export async function addToCart(data: {
   size?: string;
   color?: string;
 }) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
@@ -127,7 +105,7 @@ export async function addToCart(data: {
 }
 
 export async function getCart() {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return null;
@@ -149,7 +127,7 @@ export async function getCart() {
 }
 
 export async function updateCartItem(itemId: string, quantity: number) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
@@ -213,7 +191,7 @@ export async function updateCartItem(itemId: string, quantity: number) {
 }
 
 export async function removeFromCart(itemId: string) {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
@@ -253,7 +231,7 @@ export async function removeFromCart(itemId: string) {
   };
 }
 export async function clearCart() {
-  const userId = await getUserId();
+  const userId = await getCustomerUserId();
 
   if (!userId) {
     return {
