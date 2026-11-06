@@ -4,10 +4,27 @@ import { cookies } from "next/headers";
 import { connectDB } from "@/lib/mongodb";
 import Cart from "@/models/Cart";
 import Product from "@/models/Product";
+import Session from "@/models/Session";
+import User from "@/models/User";
 
 async function getUserId() {
   const cookieStore = await cookies();
-  return cookieStore.get("userId")?.value || null;
+  const sessionId = cookieStore.get("closet_customer_session")?.value;
+  if (!sessionId) return null;
+
+  await connectDB();
+  const session = await Session.findOne({
+    sessionId,
+    accountType: "user",
+    expiresAt: { $gt: new Date() },
+  }).select("user");
+
+  if (!session?.user) return null;
+
+  const user = await User.findById(session.user).select("isActive");
+  if (!user?.isActive) return null;
+
+  return user._id.toString();
 }
 
 export async function addToCart(data: {
